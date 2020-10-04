@@ -1,7 +1,8 @@
 {
-  "name": "stretch-project-1",
-  "version": "0.0.0",
-  "description": "",
+  "name": "sirchartsalot",
+  "version": "0.0.1",
+  "description": "A simple javascript/CSS bar chart library created as part of the Lighthouse Labs Web Development Bootcamp prep course.",
+  "author": "Jeremy Dombrowski",
   "devDependencies": {
     "eslint": "^3.19.0",
     "eslint-config-lighthouselabs": "lighthouse-labs/eslint-config-lighthouselabs"
