@@ -3,9 +3,13 @@
   "version": "0.0.1",
   "description": "A simple javascript/CSS bar chart library created as part of the Lighthouse Labs Web Development Bootcamp prep course.",
   "author": "Jeremy Dombrowski",
+  "scripts": {},
   "devDependencies": {
     "eslint": "^3.19.0",
     "eslint-config-lighthouselabs": "lighthouse-labs/eslint-config-lighthouselabs"
+  },
+  "dependencies": {
+    "@svgdotjs/svg.js": "^3.0.16",
     "halfmoon": "^1.1.1"
   }
 }
