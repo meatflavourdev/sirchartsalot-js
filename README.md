@@ -27,6 +27,7 @@ A simple JavaScript bar chart library
 - Animations for loading and updating
 - Should some properties support function definitions(?) -- function can use options context to return unique argument
 - Selection indicator *(optional)* - grey bar in the background that moves from bar to bar following mouse
+- Consider adding data table viewer feature (modal data table?)
 
 ## API Definition
 ### Initialize Chart
