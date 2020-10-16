@@ -1,0 +1,67 @@
+
+body {
+  font-family: 'Roboto', sans-serif;
+}
+
+.logo>svg {
+  fill: hsl(253deg 75% 67%);
+}
+body.dark-mode .logo>svg {
+  /* fill: #FAFAFA; */
+  fill: #FFEB3B;
+}
+
+
+body.dark-mode .content-header>svg {
+  fill: #E0E0E0;
+}
+
+.btn-circle {
+  width: 3.6rem;
+  height: 3.6rem;
+  line-height: 3.6rem;
+  padding: 0;
+  border-radius: 50%;
+  margin-bottom: 0.5rem;
+}
+
+/* Sidenav */
+
+@media (max-width: 992px) {
+  .on-this-page-nav-container {
+      display: none;
+  }
+}
+.on-this-page-nav {
+  position: fixed;
+  margin-right: 2rem;
+  z-index: 20;
+  background-color: #ffffff;
+  padding: 0.5rem;
+  border-radius: 0.4rem;
+}
+.dark-mode .on-this-page-nav {
+  background-color: #25282c;
+}
+.on-this-page-nav .title {
+  font-weight: 500;
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+.on-this-page-nav a {
+  text-align: left;
+  display: block;
+  padding: 0.5rem 0 0.5rem 2rem;
+  line-height: 1.6rem;
+  color: rgba(0, 0, 0, 0.7);
+  border-left: 1px solid rgba(0, 0, 0, 0.15);
+}
+.dark-mode .on-this-page-nav a {
+  color: rgba(255, 255, 255, 0.65);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+.on-this-page-nav a:hover,
+.dark-mode .on-this-page-nav a:hover {
+  color: #1890ff;
+  text-decoration: none;
+}
