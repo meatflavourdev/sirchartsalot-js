@@ -32,19 +32,19 @@
       href="https://cdn.jsdelivr.net/npm/halfmoon@1.1.0/css/halfmoon-variables.min.css"
       rel="stylesheet"
     />
-
-    <!-- sirchartsalot CSS -->
-    <link href="./dist/sirchartsalot.css" rel="stylesheet" />
-
-    <!-- Docs CSS -->
-    <link href="./css/docs.css" rel="stylesheet" />
-
     <!--
     Or,
     Use the following (no variables, supports IE11):
     <link href="https://cdn.jsdelivr.net/npm/halfmoon@1.1.0/css/halfmoon.min.css" rel="stylesheet" />
     Learn more: https://www.gethalfmoon.com/docs/customize/#notes-on-browser-compatibility
-  --></head>
+  -->
+
+    <!-- sirchartsalot CSS -->
+    <link href="../dist/sirchartsalot.css" rel="stylesheet" />
+
+    <!-- Docs CSS -->
+    <link href="./css/docs.css" rel="stylesheet" />
+  </head>
   <body
     class="with-custom-webkit-scrollbars with-custom-css-scrollbars"
     data-dm-shortcut-enabled="true"
@@ -156,9 +156,7 @@
               class="dropdown-menu dropdown-menu-right"
               aria-labelledby="navbar-dropdown-toggle-btn"
             >
-              <a href="./index.html" class="dropdown-item"
-                >Documentation</a
-              >
+              <a href="./index.html" class="dropdown-item">Documentation</a>
               <a href="./license.html" class="dropdown-item"
                 >License
                 <span class="text-monospace font-size-12">(MIT)</span></a
@@ -211,21 +209,39 @@
           <h5 class="sidebar-title">Getting started</h5>
           <div class="sidebar-divider"></div>
           <a href="./index.html" class="sidebar-link active">Introduction</a>
-          <a href="./docs/installation.html" class="sidebar-link">Installation</a>
-          <a href="./docs/usage.html" class="sidebar-link">Usage</a>
+          <a href="./installation.html" class="sidebar-link"
+            >Installation</a
+          >
+          <a href="./usage.html" class="sidebar-link">Usage</a>
           <br />
           <h5 class="sidebar-title">Chart Types</h5>
           <div class="sidebar-divider"></div>
-          <a href="./docs/chart-single.html" class="sidebar-link">Single Bar Graph</a>
-          <a href="./docs/chart-grouped.html" class="sidebar-link">Grouped Bar Graph </a>
-          <a href="./docs/chart-floating.html" class="sidebar-link">Floating Bar Graph </a>
+          <a href="./chart-single.html" class="sidebar-link"
+            >Single Bar Graph</a
+          >
+          <a href="./chart-grouped.html" class="sidebar-link"
+            >Grouped Bar Graph
+          </a>
+          <a href="./chart-floating.html" class="sidebar-link"
+            >Floating Bar Graph
+          </a>
           <div class="sidebar-divider"></div>
-          <a href="./docs/chart-stacked.html" class="sidebar-link">Stacked Bar Graph</a>
-          <a href="./docs/chart-100stacked.html" class="sidebar-link">100% Stacked Bar Graph</a>
-          <a href="./docs/chart-diverging.html" class="sidebar-link">Diverging Stacked Bar Graph</a>
+          <a href="./chart-stacked.html" class="sidebar-link"
+            >Stacked Bar Graph</a
+          >
+          <a href="./chart-100stacked.html" class="sidebar-link"
+            >100% Stacked Bar Graph</a
+          >
+          <a href="./chart-diverging.html" class="sidebar-link"
+            >Diverging Stacked Bar Graph</a
+          >
           <div class="sidebar-divider"></div>
-          <a href="./docs/chart-funnel.html" class="sidebar-link">Funnel Chart</a>
-          <a href="./docs/chart-splitfunnel.html" class="sidebar-link">Split Funnel Chart</a>
+          <a href="./chart-funnel.html" class="sidebar-link"
+            >Funnel Chart</a
+          >
+          <a href="./chart-splitfunnel.html" class="sidebar-link"
+            >Split Funnel Chart</a
+          >
         </div>
       </div>
       <!-- Sidebar end -->
@@ -257,9 +273,13 @@
                   <h1 class="content-title my-0">Introduction</h1>
                 </div>
                 <p>
-                  Sirchartsalot.js is a front-end javascript library for building responsive bar graphs with native support for dark mode.
+                  Sirchartsalot.js is a front-end javascript library for
+                  building responsive bar graphs with native support for dark
+                  mode.
                 </p>
-                <figure class="sirchartsalot-figure content shadow-lg bo m-0 p-0">
+                <figure
+                  class="sirchartsalot-figure content shadow-lg bo m-0 p-0"
+                >
                   <div id="graph"></div>
                   <p
                     class="sirchartsalot-description my-0 px-card py-10 bg-light-lm bg-very-dark-dm rounded-bottom"
@@ -277,7 +297,7 @@
 
                 <div class="text-right font-size-16 mb-20">
                   Up next:
-                  <a href="./docs/installation.html" class="hyperlink ml-5">
+                  <a href="./installation.html" class="hyperlink ml-5">
                     Installation
                     <i class="fa fa-angle-right ml-5" aria-hidden="true"></i>
                   </a>
@@ -307,19 +327,20 @@
     <!-- Page wrapper end -->
 
     <!-- Halfmoon JS -->
-    <script src="https://cdn.jsdelivr.net/npm/halfmoon@1.1.1/js/halfmoon.js" integrity="sha256-0ZkuxGuEGLAgjwhw1C+ouDb2o7EG3h6QnVRegRr6B6Y=" crossorigin="anonymous"></script>
-
-    <!-- jQuery -->
-    <!-- <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.js"></script> -->
-    <!-- <script>
-      window.jQuery ||
-        document.write('<script src="js/vendor/jquery-1.11.2.js"><\/script>');
-    </script> -->
+    <script
+      src="https://cdn.jsdelivr.net/npm/halfmoon@1.1.1/js/halfmoon.js"
+      integrity="sha256-0ZkuxGuEGLAgjwhw1C+ouDb2o7EG3h6QnVRegRr6B6Y="
+      crossorigin="anonymous"
+    ></script>
 
     <!-- SVG.js -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/svg.js/3.0.16/svg.js" integrity="sha512-M17tsaj3tHw5m/gI+8XjDLTuPZ0cpTofhFLJUT9niFa/DK8WAhsSLW764iSaaXoAoivXEFUP6VxvpiahJPQ4fg==" crossorigin="anonymous"></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/svg.js/3.0.16/svg.js"
+      integrity="sha512-M17tsaj3tHw5m/gI+8XjDLTuPZ0cpTofhFLJUT9niFa/DK8WAhsSLW764iSaaXoAoivXEFUP6VxvpiahJPQ4fg=="
+      crossorigin="anonymous"
+    ></script>
     <!-- sirChartsALot -->
-    <script src="./dist/sirchartsalot.js"></script>
+    <script src="../dist/sirchartsalot.js"></script>
     <!-- Docs script -->
     <script src="./js/docs.js"></script>
   </body>
