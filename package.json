@@ -3,16 +3,18 @@
   "version": "0.1.0",
   "description": "A simple javascript/CSS bar chart library created as part of the Lighthouse Labs Web Development Bootcamp prep course.",
   "author": "Jeremy Dombrowski",
+  "main": "docs/index.html",
   "scripts": {
-    "serve" : "browser-sync start -s -f . --no-notify --host $LOCAL_IP --port 9000"
+    "serve": "browser-sync start -s -f . --no-notify --host $LOCAL_IP --port 9000"
   },
   "devDependencies": {
+    "@rollup/plugin-node-resolve": "^9.0.0",
     "eslint": "^3.19.0",
-    "eslint-config-lighthouselabs": "lighthouse-labs/eslint-config-lighthouselabs"
+    "eslint-config-lighthouselabs": "lighthouse-labs/eslint-config-lighthouselabs",
+    "rollup-plugin-css-bundle": "^1.0.4"
   },
   "dependencies": {
     "@svgdotjs/svg.js": "^3.0.16",
-    "domready": "^1.0.8",
-    "halfmoon": "^1.1.1"
+    "domready": "^1.0.8"
   }
 }

@@ -7,3 +7,7 @@ body {
   width: 100%;
   height: 100%;
 }
+
+.gridline-major-x{
+  stroke: rgb(207, 207, 207);
+}
