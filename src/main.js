@@ -90,7 +90,7 @@ class Chart {
     maxTicks: 10,
     maxMinorTicks: 5,
     minorLength: 8,
-    minorColor: "#c3c3c3",
+    minorColor: "#c2c2c2",
     minorColorDark: "#9E9E9E",
     minorThickness: 0.5,
   };
