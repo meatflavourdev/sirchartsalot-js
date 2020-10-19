@@ -14,66 +14,122 @@ SirChartsALot JS
 * The above notice must be included in its entirety when this file is used.
 */
 
-let chart = {
-  config: {
-    darkmode: false,
-  },
-  margin: {
-    top: 40,
-    bottom: 50,
-    left: 72,
-    right: 50,
-  },
-  size: {
-    width: 2000,
-    height: 1000,
-  },
-  axis: {
-    color: "#BDBDBD",
-    colorDark: "#9E9E9E",
-    thickness: 1,
-  },
-  tick: {
-    length: 15,
-    color: "#9E9E9E",
-    colorDark: "#9E9E9E",
-    thickness: 1,
-    maxTicks: 10,
-    maxMinorTicks: 5,
-    minorLength: 8,
-    minorColor: "#FAFAFA",
-    minorColorDark: "#9E9E9E",
-    minorThickness: 0.5,
-  },
-  grid: {
-    major: true,
-    minor: false,
-    majorColor: "#E0E0E0",
-    majorColorDark: "#757575",
-    majorThickness: 1,
-    majorDasharray: "4,4",
-    minorColor: "#E0E0E0",
-    minorColorDark: "#E0E0E0",
-    minorThickness: 1,
-    minorDasharray: "5,10",
-  },
-  labels: {
-    yOffset: 20,
-    xOffset: 15,
-    color: "#000000",
-    colorDark: "#E0E0E0",
-  },
-  bar: {
-    spacing: 25,
-    color: "#FFEB3B",
-    colorDark: "#7048ff",
-    fillOpacity: 0.8,
-    strokeColor: "#FDD835",
-    strokeColorDark: "#7f5cff",
-    strokeWidth: 2,
-  },
-  shapes: {},
-  toggleDarkMode: function () {
+/**
+ * Initialize sirchartsalot chart with specified data and options and attach to element
+ * @param  {Object} data The chart data object
+ * @param  {Object} options Chart options configuration object
+ * @param  {String} element The selector of the element to attach the chart to
+ * @return {Object} Chart object
+ */
+export const drawBarChart = function (data, options, element) {
+  let chart = new Chart(data, options);
+  // Get data from params and store it in config object
+  chart.data = data;
+  //Detect dark mode and set config
+  chart.config.darkmode = detectDarkMode();
+
+  setMutationObserver();
+
+  var chartSVG = SVG()
+    .addTo(element)
+    .size("100%", "100%")
+    .viewbox(0, 0, chart.size.width, chart.size.height);
+
+  // Calculate chart axis min, max, major/minor interval
+  let dataMax = 0;
+  let dataMin = 0;
+  for (const datum of data) {
+    dataMax = datum > dataMax ? datum : dataMax;
+    dataMin = datum < dataMin ? datum : dataMin;
+  }
+  chart.scale = calculateTicks(
+    chart.tick.maxTicks,
+    chart.tick.maxMinorTicks,
+    dataMin,
+    dataMax
+  );
+  console.log(chart.scale);
+
+  chart.shapes.gridLines = draw.drawGridLines(chartSVG, chart);
+  chart.shapes.bars = draw.drawBars(chartSVG, chart);
+  chart.shapes.yAxisLine = draw.drawYAxisLine(chartSVG, chart);
+  chart.shapes.xAxisLine = draw.drawXAxisLine(chartSVG, chart);
+  chart.shapes.yAxisMinorTicks = draw.drawYAxisMinorTicks(chartSVG, chart);
+  chart.shapes.yAxisMajorTicks = draw.drawYAxisMajorTicks(chartSVG, chart);
+  chart.shapes.xAxisMajorTicks = draw.drawXAxisMajorTicks(chartSVG, chart);
+  chart.shapes.yAxisLabels = draw.drawYAxisLabels(chartSVG, chart);
+  chart.shapes.xAxisLabels = draw.drawXAxisLabels(chartSVG, chart);
+
+  return chart;
+};
+
+class Chart {
+  config =  {
+      darkmode: false,
+    };
+  margin = {
+      top: 40,
+      bottom: 50,
+      left: 72,
+      right: 50,
+    };
+    size = {
+      width: 2000,
+      height: 1000,
+    };
+    axis = {
+      color: "#BDBDBD",
+      colorDark: "#9E9E9E",
+      thickness: 1,
+    };
+    tick = {
+      length: 15,
+      color: "#9E9E9E",
+      colorDark: "#9E9E9E",
+      thickness: 1,
+      maxTicks: 10,
+      maxMinorTicks: 5,
+      minorLength: 8,
+      minorColor: "#c3c3c3",
+      minorColorDark: "#9E9E9E",
+      minorThickness: 0.5,
+    };
+    grid = {
+      major: true,
+      minor: false,
+      majorColor: "#E0E0E0",
+      majorColorDark: "#757575",
+      majorThickness: 1,
+      majorDasharray: "4,4",
+      minorColor: "#E0E0E0",
+      minorColorDark: "#E0E0E0",
+      minorThickness: 1,
+      minorDasharray: "5,10",
+    };
+    labels = {
+      yOffset: 20,
+      xOffset: 15,
+      color: "#000000",
+      colorDark: "#E0E0E0",
+    };
+    bar = {
+      spacing: 25,
+      color: "#FFEB3B",
+      colorDark: "#7048ff",
+      fillOpacity: 0.8,
+      strokeColor: "#FDD835",
+      strokeColorDark: "#7f5cff",
+      strokeWidth: 2,
+    };
+    shapes = {};
+
+  constructor(data, options){
+    this.data = data;
+    this.options = options;
+    //processOptions();
+  }
+
+  toggleDarkMode() {
     this.config.darkmode = !this.config.darkmode;
     // Set colours on elements to light
     for (const child of this.shapes.gridLines.x.children()) {
@@ -133,15 +189,10 @@ let chart = {
         fill: this.config.darkmode ? this.labels.colorDark : this.labels.color,
       });
     }
-  },
+  };
 };
 
-export const drawBarChart = function (data, options, element) {
-  // Get data from params and store it in config object
-  chart.data = data;
-  //Detect dark mode and set config
-  chart.config.darkmode = detectDarkMode();
-
+function setMutationObserver(){
   //Set up body class observer to watch for dark mode activation
   function callback(mutationsList) {
     mutationsList.forEach((mutation) => {
@@ -161,98 +212,69 @@ export const drawBarChart = function (data, options, element) {
   mutationObserver.observe(document.querySelector("body"), {
     attributes: true,
   });
-
-  var draw = SVG()
-    .addTo(element)
-    .size("100%", "100%")
-    .viewbox(0, 0, chart.size.width, chart.size.height);
-
-  // Calculate chart axis min, max, major/minor interval
-  let dataMax = 0;
-  let dataMin = 0;
-  for (const datum of data) {
-    dataMax = datum > dataMax ? datum : dataMax;
-    dataMin = datum < dataMin ? datum : dataMin;
-  }
-  chart.scale = calculateTicks(
-    chart.tick.maxTicks,
-    chart.tick.maxMinorTicks,
-    dataMin,
-    dataMax
-  );
-  console.log(chart.scale);
-
-  chart.shapes.gridLines = drawGridLines(draw, chart);
-  chart.shapes.bars = drawBars(draw, chart);
-  chart.shapes.yAxisLine = drawYAxisLine(draw, chart);
-  chart.shapes.xAxisLine = drawXAxisLine(draw, chart);
-  chart.shapes.yAxisMinorTicks = drawYAxisMinorTicks(draw, chart);
-  chart.shapes.yAxisMajorTicks = drawYAxisMajorTicks(draw, chart);
-  chart.shapes.xAxisMajorTicks = drawXAxisMajorTicks(draw, chart);
-  chart.shapes.yAxisLabels = drawYAxisLabels(draw, chart);
-  chart.shapes.xAxisLabels = drawXAxisLabels(draw, chart);
-
-  return chart;
-};
+}
 
 // Detect dark mode
 function detectDarkMode() {
-  return document.querySelector("body").classList.contains("dark-mode");
+  let element = document.querySelector("body");
+  let darkmode = element.classList.contains("dark-mode");
+  return darkmode;
 }
 
+const draw = {};
 // Draw the chart y-axis line
-function drawYAxisLine(draw, config) {
-  return draw
+draw.drawYAxisLine = function (svg, chart) {
+  return svg
     .line(
-      config.margin.left,
-      config.margin.top,
-      config.margin.left,
-      config.size.height - config.margin.bottom
+      chart.margin.left,
+      chart.margin.top,
+      chart.margin.left,
+      chart.size.height - chart.margin.bottom
     )
     .stroke({
-      color: chart.config.darkmode ? config.axis.colorDark : config.axis.color,
-      width: config.axis.thickness,
+      color: chart.config.darkmode ? chart.axis.colorDark : chart.axis.color,
+      width: chart.axis.thickness,
       linecap: "round",
     });
 }
 
 // Draw the chart x-axis line
-function drawXAxisLine(draw, config) {
-  return draw
+draw.drawXAxisLine = function (svg, chart) {
+  return svg
     .line(
-      config.margin.left,
-      config.size.height - config.margin.bottom,
-      config.size.width - config.margin.right,
-      config.size.height - config.margin.bottom
+      chart.margin.left,
+      chart.size.height - chart.margin.bottom,
+      chart.size.width - chart.margin.right,
+      chart.size.height - chart.margin.bottom
     )
     .stroke({
-      color: chart.config.darkmode ? config.axis.colorDark : config.axis.color,
-      width: config.axis.thickness,
+      color: chart.config.darkmode ? chart.axis.colorDark : chart.axis.color,
+      width: chart.axis.thickness,
       linecap: "round",
     });
 }
 
 // Draw the y-axis minor ticks
-function drawYAxisMinorTicks(draw, config) {
-  let yAxisMinorTicks = draw.group();
-  let xStart = config.margin.left;
-  let xEnd = config.margin.left - config.tick.minorLength;
-  let yStart = config.margin.top;
-  let yEnd = config.size.height - config.margin.bottom;
+draw.drawYAxisMinorTicks = function (svg, chart) {
+  let yAxisMinorTicks = svg.group();
+  let xStart = chart.margin.left;
+  let xEnd = chart.margin.left - chart.tick.minorLength;
+  let yStart = chart.margin.top;
+  let yEnd = chart.size.height - chart.margin.bottom;
   let yRange = Math.abs(yEnd - yStart);
   let yTickSpacing =
-    yRange / config.scale.tickCount / config.scale.minorTickCount;
+    yRange / chart.scale.tickCount / chart.scale.minorTickCount;
   for (
     let i = 0;
-    i <= config.scale.tickCount * config.scale.minorTickCount;
+    i <= chart.scale.tickCount * chart.scale.minorTickCount;
     i++
   ) {
     let yCurrent = yStart + i * yTickSpacing;
     yAxisMinorTicks.line(xStart, yCurrent, xEnd, yCurrent).stroke({
       color: chart.config.darkmode
-        ? config.tick.minorColorDark
-        : config.tick.minorColor,
-      width: config.tick.thickness,
+        ? chart.tick.minorColorDark
+        : chart.tick.minorColor,
+      width: chart.tick.thickness,
       linecap: "round",
     });
   }
@@ -260,19 +282,19 @@ function drawYAxisMinorTicks(draw, config) {
 }
 
 // Draw the y-axis major ticks
-function drawYAxisMajorTicks(draw, config) {
-  let yAxisMajorTicks = draw.group();
-  let xStart = config.margin.left;
-  let xEnd = config.margin.left - config.tick.length;
-  let yStart = config.margin.top;
-  let yEnd = config.size.height - config.margin.bottom;
+draw.drawYAxisMajorTicks = function (svg, chart) {
+  let yAxisMajorTicks = svg.group();
+  let xStart = chart.margin.left;
+  let xEnd = chart.margin.left - chart.tick.length;
+  let yStart = chart.margin.top;
+  let yEnd = chart.size.height - chart.margin.bottom;
   let yRange = Math.abs(yEnd - yStart);
-  let yTickSpacing = yRange / config.scale.tickCount;
-  for (let i = 0; i <= config.scale.tickCount; i++) {
+  let yTickSpacing = yRange / chart.scale.tickCount;
+  for (let i = 0; i <= chart.scale.tickCount; i++) {
     let yCurrent = yStart + i * yTickSpacing;
     yAxisMajorTicks.line(xStart, yCurrent, xEnd, yCurrent).stroke({
-      color: chart.config.darkmode ? config.tick.colorDark : config.tick.color,
-      width: config.tick.thickness,
+      color: chart.config.darkmode ? chart.tick.colorDark : chart.tick.color,
+      width: chart.tick.thickness,
       linecap: "round",
     });
   }
@@ -280,19 +302,19 @@ function drawYAxisMajorTicks(draw, config) {
 }
 
 // Draw the x-axis ticks
-function drawXAxisMajorTicks(draw, config) {
-  let xAxisMajorTicks = draw.group();
-  let yStart = config.size.height - config.margin.bottom;
-  let yEnd = yStart + config.tick.length;
-  let xStart = config.margin.left;
-  let xEnd = config.size.width - config.margin.right;
+draw.drawXAxisMajorTicks = function (svg, chart) {
+  let xAxisMajorTicks = svg.group();
+  let yStart = chart.size.height - chart.margin.bottom;
+  let yEnd = yStart + chart.tick.length;
+  let xStart = chart.margin.left;
+  let xEnd = chart.size.width - chart.margin.right;
   let xRange = Math.abs(xEnd - xStart);
-  let xTickSpacing = xRange / config.data.length;
-  for (let i = 0; i <= config.data.length; i++) {
+  let xTickSpacing = xRange / chart.data.length;
+  for (let i = 0; i <= chart.data.length; i++) {
     let xCurrent = xStart + i * xTickSpacing;
     xAxisMajorTicks.line(xCurrent, yStart, xCurrent, yEnd).stroke({
-      color: chart.config.darkmode ? config.tick.colorDark : config.tick.color,
-      width: config.tick.thickness,
+      color: chart.config.darkmode ? chart.tick.colorDark : chart.tick.color,
+      width: chart.tick.thickness,
       linecap: "round",
     });
   }
@@ -300,26 +322,26 @@ function drawXAxisMajorTicks(draw, config) {
 }
 
 // Draw backgroud graph lines
-function drawGridLines(draw, config) {
+draw.drawGridLines = function (svg, chart) {
   let gridLines = {
-    x: draw.group(),
-    y: draw.group(),
+    x: svg.group(),
+    y: svg.group(),
   };
   let xAxisStart = {
-    x1: config.margin.left,
-    y1: config.size.height - config.margin.bottom,
-    x2: config.size.width - config.margin.right,
-    y2: config.size.height - config.margin.bottom,
+    x1: chart.margin.left,
+    y1: chart.size.height - chart.margin.bottom,
+    x2: chart.size.width - chart.margin.right,
+    y2: chart.size.height - chart.margin.bottom,
   };
   let yAxisStart = {
-    x1: config.margin.left,
-    y1: config.size.height - config.margin.bottom,
-    x2: config.margin.left,
-    y2: config.margin.top,
+    x1: chart.margin.left,
+    y1: chart.size.height - chart.margin.bottom,
+    x2: chart.margin.left,
+    y2: chart.margin.top,
   };
-  let yStep = Math.abs(yAxisStart.y2 - yAxisStart.y1) / config.scale.tickCount;
-  let xStep = Math.abs(xAxisStart.x2 - xAxisStart.x1) / config.data.length;
-  for (let i = 1; i <= config.scale.tickCount; i++) {
+  let yStep = Math.abs(yAxisStart.y2 - yAxisStart.y1) / chart.scale.tickCount;
+  let xStep = Math.abs(xAxisStart.x2 - xAxisStart.x1) / chart.data.length;
+  for (let i = 1; i <= chart.scale.tickCount; i++) {
     let xAxisCurrent = {
       y1: xAxisStart.y1 - i * yStep,
       y2: xAxisStart.y2 - i * yStep,
@@ -328,16 +350,16 @@ function drawGridLines(draw, config) {
       .line(xAxisStart.x1, xAxisCurrent.y1, xAxisStart.x2, xAxisCurrent.y2)
       .stroke({
         color: chart.config.darkmode
-          ? config.grid.majorColorDark
-          : config.grid.majorColor,
-        width: config.grid.majorThickness,
+          ? chart.grid.majorColorDark
+          : chart.grid.majorColor,
+        width: chart.grid.majorThickness,
         linecap: "round",
-        dasharray: config.grid.majorDasharray,
+        dasharray: chart.grid.majorDasharray,
       })
       .addClass("gridline-major-x");
   }
 
-  for (let i = 0; i <= config.data.length; i++) {
+  for (let i = 0; i <= chart.data.length; i++) {
     let yAxisCurrent = {
       x1: yAxisStart.x1 + i * xStep,
       x2: yAxisStart.x2 + i * xStep,
@@ -346,11 +368,11 @@ function drawGridLines(draw, config) {
       .line(yAxisCurrent.x1, yAxisStart.y1, yAxisCurrent.x2, yAxisStart.y2)
       .stroke({
         color: chart.config.darkmode
-          ? config.grid.majorColorDark
-          : config.grid.majorColor,
-        width: config.grid.majorThickness,
+          ? chart.grid.majorColorDark
+          : chart.grid.majorColor,
+        width: chart.grid.majorThickness,
         linecap: "round",
-        dasharray: config.grid.majorDasharray,
+        dasharray: chart.grid.majorDasharray,
       })
       .addClass("gridline-major-y");
   }
@@ -358,20 +380,20 @@ function drawGridLines(draw, config) {
 }
 
 // Draw bars
-function drawBars(draw, config) {
-  let bars = draw.group();
-  let xAxisStart = config.margin.left;
-  let xAxisEnd = config.size.width - config.margin.right;
+draw.drawBars = function (svg, chart) {
+  let bars = svg.group();
+  let xAxisStart = chart.margin.left;
+  let xAxisEnd = chart.size.width - chart.margin.right;
   let xAxisRange = Math.abs(xAxisEnd - xAxisStart);
-  let barSpace = xAxisRange / config.data.length;
+  let barSpace = xAxisRange / chart.data.length;
   let xStart = xAxisStart + barSpace / 2;
-  let width = barSpace - barSpace * (config.bar.spacing / 100);
-  let yStart = config.size.height - config.margin.bottom;
-  let yEnd = config.margin.top;
+  let width = barSpace - barSpace * (chart.bar.spacing / 100);
+  let yStart = chart.size.height - chart.margin.bottom;
+  let yEnd = chart.margin.top;
   let yRange = Math.abs(yEnd - yStart);
   let yConstant =
-    yRange / Math.abs(config.scale.niceMax - config.scale.niceMin);
-  for (let i = 0; i < config.data.length; i++) {
+    yRange / Math.abs(chart.scale.niceMax - chart.scale.niceMin);
+  for (let i = 0; i < chart.data.length; i++) {
     let xCurrent = xStart + barSpace * i;
     bars
       .rect(width, data[i] * yConstant)
@@ -383,12 +405,12 @@ function drawBars(draw, config) {
         },
       })
       .attr({
-        fill: chart.config.darkmode ? config.bar.colorDark : config.bar.color,
-        "fill-opacity": config.bar.fillOpacity,
+        fill: chart.config.darkmode ? chart.bar.colorDark : chart.bar.color,
+        "fill-opacity": chart.bar.fillOpacity,
         stroke: chart.config.darkmode
-          ? config.bar.strokeColorDark
-          : config.bar.strokeColor,
-        "stroke-width": config.bar.strokeWidth,
+          ? chart.bar.strokeColorDark
+          : chart.bar.strokeColor,
+        "stroke-width": chart.bar.strokeWidth,
       })
       .addClass("bar")
       .addClass("dataset-01");
@@ -397,15 +419,15 @@ function drawBars(draw, config) {
 }
 
 // Draw y-axis labels
-function drawYAxisLabels(draw, config) {
-  let yAxisLabels = draw.group();
-  let xOrigin = config.margin.left - config.labels.yOffset;
-  let yOrigin = config.size.height - config.margin.bottom;
-  let yRange = Math.abs(config.margin.top - yOrigin);
-  let yStep = yRange / config.scale.tickCount;
-  for (let i = 0; i <= config.scale.tickCount; i++) {
+draw.drawYAxisLabels = function (svg, chart) {
+  let yAxisLabels = svg.group();
+  let xOrigin = chart.margin.left - chart.labels.yOffset;
+  let yOrigin = chart.size.height - chart.margin.bottom;
+  let yRange = Math.abs(chart.margin.top - yOrigin);
+  let yStep = yRange / chart.scale.tickCount;
+  for (let i = 0; i <= chart.scale.tickCount; i++) {
     let yCurrent = yOrigin - i * yStep;
-    let yValue = config.scale.niceMin + i * config.scale.tickSpacing;
+    let yValue = chart.scale.niceMin + i * chart.scale.tickSpacing;
     let labelText = (+yValue)
       .toFixed(2)
       .replace(/([0-9]+(\.[0-9]+[1-9])?)(\.?0+$)/, "$1");
@@ -429,15 +451,15 @@ function drawYAxisLabels(draw, config) {
 }
 
 // Draw x-axis labels
-function drawXAxisLabels(draw, config) {
-  let xAxisLabels = draw.group();
-  let xOrigin = config.margin.left;
+draw.drawXAxisLabels = function (svg, chart) {
+  let xAxisLabels = svg.group();
+  let xOrigin = chart.margin.left;
   let yOrigin =
-    config.size.height - config.margin.bottom + config.labels.xOffset;
-  let xRange = Math.abs(config.size.width - config.margin.right - xOrigin);
-  let xStep = xRange / config.data.length;
+    chart.size.height - chart.margin.bottom + chart.labels.xOffset;
+  let xRange = Math.abs(chart.size.width - chart.margin.right - xOrigin);
+  let xStep = xRange / chart.data.length;
   let xStart = xOrigin + xStep / 2;
-  for (let i = 0; i < config.data.length; i++) {
+  for (let i = 0; i < chart.data.length; i++) {
     let xCurrent = xStart + i * xStep;
     xAxisLabels
       .text(String(i))
