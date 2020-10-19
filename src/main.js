@@ -64,66 +64,66 @@ export const drawBarChart = function (data, options, element) {
 };
 
 class Chart {
-  config =  {
-      darkmode: false,
-    };
+  config = {
+    darkmode: false,
+  };
   margin = {
-      top: 40,
-      bottom: 50,
-      left: 72,
-      right: 50,
-    };
-    size = {
-      width: 2000,
-      height: 1000,
-    };
-    axis = {
-      color: "#BDBDBD",
-      colorDark: "#9E9E9E",
-      thickness: 1,
-    };
-    tick = {
-      length: 15,
-      color: "#9E9E9E",
-      colorDark: "#9E9E9E",
-      thickness: 1,
-      maxTicks: 10,
-      maxMinorTicks: 5,
-      minorLength: 8,
-      minorColor: "#c3c3c3",
-      minorColorDark: "#9E9E9E",
-      minorThickness: 0.5,
-    };
-    grid = {
-      major: true,
-      minor: false,
-      majorColor: "#E0E0E0",
-      majorColorDark: "#757575",
-      majorThickness: 1,
-      majorDasharray: "4,4",
-      minorColor: "#E0E0E0",
-      minorColorDark: "#E0E0E0",
-      minorThickness: 1,
-      minorDasharray: "5,10",
-    };
-    labels = {
-      yOffset: 20,
-      xOffset: 15,
-      color: "#000000",
-      colorDark: "#E0E0E0",
-    };
-    bar = {
-      spacing: 25,
-      color: "#FFEB3B",
-      colorDark: "#7048ff",
-      fillOpacity: 0.8,
-      strokeColor: "#FDD835",
-      strokeColorDark: "#7f5cff",
-      strokeWidth: 2,
-    };
-    shapes = {};
+    top: 40,
+    bottom: 50,
+    left: 72,
+    right: 50,
+  };
+  size = {
+    width: 2000,
+    height: 1000,
+  };
+  axis = {
+    color: "#BDBDBD",
+    colorDark: "#9E9E9E",
+    thickness: 1,
+  };
+  tick = {
+    length: 15,
+    color: "#9E9E9E",
+    colorDark: "#9E9E9E",
+    thickness: 1,
+    maxTicks: 10,
+    maxMinorTicks: 5,
+    minorLength: 8,
+    minorColor: "#c3c3c3",
+    minorColorDark: "#9E9E9E",
+    minorThickness: 0.5,
+  };
+  grid = {
+    major: true,
+    minor: false,
+    majorColor: "#E0E0E0",
+    majorColorDark: "#757575",
+    majorThickness: 1,
+    majorDasharray: "4,4",
+    minorColor: "#E0E0E0",
+    minorColorDark: "#E0E0E0",
+    minorThickness: 1,
+    minorDasharray: "5,10",
+  };
+  labels = {
+    yOffset: 20,
+    xOffset: 15,
+    color: "#000000",
+    colorDark: "#E0E0E0",
+  };
+  bar = {
+    spacing: 25,
+    color: "#FFEB3B",
+    colorDark: "#7048ff",
+    fillOpacity: 0.8,
+    strokeColor: "#FDD835",
+    strokeColorDark: "#7f5cff",
+    strokeWidth: 2,
+  };
+  shapes = {};
 
-  constructor(data, options){
+  constructor(data, options) {
     this.data = data;
     this.options = options;
     //processOptions();
@@ -189,10 +189,10 @@ class Chart {
         fill: this.config.darkmode ? this.labels.colorDark : this.labels.color,
       });
     }
-  };
-};
+  }
+}
 
-function setMutationObserver(){
+function setMutationObserver() {
   //Set up body class observer to watch for dark mode activation
   function callback(mutationsList) {
     mutationsList.forEach((mutation) => {
@@ -236,7 +236,7 @@ draw.drawYAxisLine = function (svg, chart) {
       width: chart.axis.thickness,
       linecap: "round",
     });
-}
+};
 
 // Draw the chart x-axis line
 draw.drawXAxisLine = function (svg, chart) {
@@ -252,7 +252,7 @@ draw.drawXAxisLine = function (svg, chart) {
       width: chart.axis.thickness,
       linecap: "round",
     });
-}
+};
 
 // Draw the y-axis minor ticks
 draw.drawYAxisMinorTicks = function (svg, chart) {
@@ -279,7 +279,7 @@ draw.drawYAxisMinorTicks = function (svg, chart) {
     });
   }
   return yAxisMinorTicks;
-}
+};
 
 // Draw the y-axis major ticks
 draw.drawYAxisMajorTicks = function (svg, chart) {
@@ -299,7 +299,7 @@ draw.drawYAxisMajorTicks = function (svg, chart) {
     });
   }
   return yAxisMajorTicks;
-}
+};
 
 // Draw the x-axis ticks
 draw.drawXAxisMajorTicks = function (svg, chart) {
@@ -319,7 +319,7 @@ draw.drawXAxisMajorTicks = function (svg, chart) {
     });
   }
   return xAxisMajorTicks;
-}
+};
 
 // Draw backgroud graph lines
 draw.drawGridLines = function (svg, chart) {
@@ -377,7 +377,7 @@ draw.drawGridLines = function (svg, chart) {
       .addClass("gridline-major-y");
   }
   return gridLines;
-}
+};
 
 // Draw bars
 draw.drawBars = function (svg, chart) {
@@ -391,8 +391,7 @@ draw.drawBars = function (svg, chart) {
   let yStart = chart.size.height - chart.margin.bottom;
   let yEnd = chart.margin.top;
   let yRange = Math.abs(yEnd - yStart);
-  let yConstant =
-    yRange / Math.abs(chart.scale.niceMax - chart.scale.niceMin);
+  let yConstant = yRange / Math.abs(chart.scale.niceMax - chart.scale.niceMin);
   for (let i = 0; i < chart.data.length; i++) {
     let xCurrent = xStart + barSpace * i;
     bars
@@ -416,7 +415,7 @@ draw.drawBars = function (svg, chart) {
       .addClass("dataset-01");
   }
   return bars;
-}
+};
 
 // Draw y-axis labels
 draw.drawYAxisLabels = function (svg, chart) {
@@ -448,14 +447,13 @@ draw.drawYAxisLabels = function (svg, chart) {
       });
   }
   return yAxisLabels;
-}
+};
 
 // Draw x-axis labels
 draw.drawXAxisLabels = function (svg, chart) {
   let xAxisLabels = svg.group();
   let xOrigin = chart.margin.left;
-  let yOrigin =
-    chart.size.height - chart.margin.bottom + chart.labels.xOffset;
+  let yOrigin = chart.size.height - chart.margin.bottom + chart.labels.xOffset;
   let xRange = Math.abs(chart.size.width - chart.margin.right - xOrigin);
   let xStep = xRange / chart.data.length;
   let xStart = xOrigin + xStep / 2;
@@ -478,7 +476,7 @@ draw.drawXAxisLabels = function (svg, chart) {
       });
   }
   return xAxisLabels;
-}
+};
 
 /**
  * Calculate and update values for tick spacing and nice
