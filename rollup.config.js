@@ -1,5 +1,3 @@
-import serve from "rollup-plugin-serve";
-import livereload from "rollup-plugin-livereload";
 import cssbundle from "rollup-plugin-css-bundle";
 
 export default {
@@ -10,8 +8,6 @@ export default {
     format: "iife",
   },
   plugins: [
-    serve(),
-    livereload(),
     cssbundle()
   ],
 };
