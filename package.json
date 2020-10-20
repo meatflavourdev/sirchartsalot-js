@@ -5,8 +5,8 @@
   "author": "Jeremy Dombrowski",
   "main": "docs/index.html",
   "scripts": {
-    "serve": "browser-sync start -s -f . --no-notify --host $LOCAL_IP --port 9000",
-    "build": "rollup -c"
+    "build": "rollup -c",
+    "watch": "rollup -c -w"
   },
   "devDependencies": {
     "@rollup/plugin-node-resolve": "^9.0.0",
