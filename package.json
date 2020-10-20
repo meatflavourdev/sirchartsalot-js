@@ -1,6 +1,6 @@
 {
   "name": "sirchartsalot",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "A simple javascript/CSS bar chart library created as part of the Lighthouse Labs Web Development Bootcamp prep course.",
   "author": "Jeremy Dombrowski",
   "main": "docs/index.html",
