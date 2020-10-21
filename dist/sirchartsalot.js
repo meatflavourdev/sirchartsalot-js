@@ -1,6 +1,64 @@
 var sirChart = (function (exports) {
    'use strict';
 
+   const defaultOptions = {
+     config: {},
+     size: {
+       width: 2000,
+       height: 1000
+     },
+     margin: {
+       top: 40,
+       bottom: 50,
+       left: 72,
+       right: 50,
+     },
+     axis: {
+       color: "#BDBDBD",
+       colorDark: "#9E9E9E",
+       thickness: 1,
+     },
+     tick: {
+       length: 15,
+       color: "#9E9E9E",
+       colorDark: "#9E9E9E",
+       thickness: 1,
+       maxTicks: 10,
+       maxMinorTicks: 5,
+       minorLength: 8,
+       minorColor: "#c2c2c2",
+       minorColorDark: "#9E9E9E",
+       minorThickness: 0.5,
+     },
+     grid: {
+       major: true,
+       minor: false,
+       majorColor: "#E0E0E0",
+       majorColorDark: "#757575",
+       majorThickness: 1,
+       majorDasharray: "4,4",
+       minorColor: "#E0E0E0",
+       minorColorDark: "#E0E0E0",
+       minorThickness: 1,
+       minorDasharray: "5,10",
+     },
+     labels: {
+       yOffset: 20,
+       xOffset: 15,
+       color: "#000000",
+       colorDark: "#E0E0E0",
+     },
+     bar: {
+       spacing: 25,
+       color: "#FFEB3B",
+       colorDark: "#7048ff",
+       fillOpacity: 0.8,
+       strokeColor: "#FDD835",
+       strokeColorDark: "#7f5cff",
+       strokeWidth: 2,
+     }
+   };
+
    //import { SVG } from '@svgdotjs/svg.js/dist/svg.esm.js';
 
    /*
@@ -22,11 +80,14 @@ var sirChart = (function (exports) {
     * @return {Object} Chart object
     */
    const drawBarChart = function (data, options, element) {
-     let chart = new Chart(data, options);
+     let chartOptions = mergeOptions(defaultOptions, options);
+
+     let chart = new Chart(data, chartOptions);
+     console.log(chart);
      // Get data from params and store it in config object
      chart.data = data;
      //Detect dark mode and set config
-     chart.config.darkmode = detectDarkMode();
+     chart.options.config.darkmode = (chart.options.config.darkmode) ? chart.options.config.darkmode : detectDarkMode();
 
      setMutationObserver();
 
@@ -39,7 +100,7 @@ var sirChart = (function (exports) {
      var chartSVG = SVG()
        .addTo(element)
        .size("100%", "100%")
-       .viewbox(0, 0, chart.size.width, chart.size.height);
+       .viewbox(0, 0, chart.options.size.width, chart.options.size.height);
 
      // Calculate chart axis min, max, major/minor interval
      let dataMax = 0;
@@ -49,8 +110,8 @@ var sirChart = (function (exports) {
        dataMin = datum < dataMin ? datum : dataMin;
      }
      chart.scale = calculateTicks(
-       chart.tick.maxTicks,
-       chart.tick.maxMinorTicks,
+       chart.options.tick.maxTicks,
+       chart.options.tick.maxMinorTicks,
        dataMin,
        dataMax
      );
@@ -72,141 +133,92 @@ var sirChart = (function (exports) {
    class Chart {
      constructor(data, options) {
        this.data = data;
-       this.options = options;
+       this.options = {...defaultOptions, ...options};
        //processOptions();
-       this.config = {
-         darkmode: false,
-       };
-       this.margin = {
-         top: 40,
-         bottom: 50,
-         left: 72,
-         right: 50,
-       };
-       this.size = {
-         width: 2000,
-         height: 1000,
-       };
-       this.axis = {
-         color: "#BDBDBD",
-         colorDark: "#9E9E9E",
-         thickness: 1,
-       };
-       this.tick = {
-         length: 15,
-         color: "#9E9E9E",
-         colorDark: "#9E9E9E",
-         thickness: 1,
-         maxTicks: 10,
-         maxMinorTicks: 5,
-         minorLength: 8,
-         minorColor: "#c2c2c2",
-         minorColorDark: "#9E9E9E",
-         minorThickness: 0.5,
-       };
-       this.grid = {
-         major: true,
-         minor: false,
-         majorColor: "#E0E0E0",
-         majorColorDark: "#757575",
-         majorThickness: 1,
-         majorDasharray: "4,4",
-         minorColor: "#E0E0E0",
-         minorColorDark: "#E0E0E0",
-         minorThickness: 1,
-         minorDasharray: "5,10",
-       };
-       this.labels = {
-         yOffset: 20,
-         xOffset: 15,
-         color: "#000000",
-         colorDark: "#E0E0E0",
-       };
-       this.bar = {
-         spacing: 25,
-         color: "#FFEB3B",
-         colorDark: "#7048ff",
-         fillOpacity: 0.8,
-         strokeColor: "#FDD835",
-         strokeColorDark: "#7f5cff",
-         strokeWidth: 2,
-       };
+
        this.shapes = {};
        this.css = {};
      }
 
      toggleDarkMode() {
-       this.config.darkmode = !this.config.darkmode;
+       this.options.config.darkmode = !this.options.config.darkmode;
        // Set colours on elements to light
        for (const child of this.shapes.gridLines.x.children()) {
          child.attr({
-           stroke: this.config.darkmode
-             ? this.grid.majorColorDark
-             : this.grid.majorColor,
+           stroke: this.options.config.darkmode
+             ? this.options.grid.majorColorDark
+             : this.options.grid.majorColor,
          });
        }
        for (const child of this.shapes.gridLines.y.children()) {
          child.attr({
-           stroke: this.config.darkmode
-             ? this.grid.majorColorDark
-             : this.grid.majorColor,
+           stroke: this.options.config.darkmode
+             ? this.options.grid.majorColorDark
+             : this.options.grid.majorColor,
          });
        }
        this.shapes.yAxisLine.attr({
-         stroke: this.config.darkmode ? this.axis.colorDark : this.axis.color,
+         stroke: this.options.config.darkmode ? this.options.axis.colorDark : this.options.axis.color,
        });
        this.shapes.xAxisLine.attr({
-         stroke: this.config.darkmode ? this.axis.colorDark : this.axis.color,
+         stroke: this.options.config.darkmode ? this.options.axis.colorDark : this.options.axis.color,
        });
        for (const child of this.shapes.bars.children()) {
          child.attr({
-           fill: this.config.darkmode ? this.bar.colorDark : this.bar.color,
-           stroke: this.config.darkmode
-             ? this.bar.strokeColorDark
-             : this.bar.strokeColor,
+           fill: this.options.config.darkmode ? this.options.bar.colorDark : this.options.bar.color,
+           stroke: this.options.config.darkmode
+             ? this.options.bar.strokeColorDark
+             : this.options.bar.strokeColor,
          });
        }
        for (const child of this.shapes.yAxisMinorTicks.children()) {
          child.attr({
-           stroke: this.config.darkmode
-             ? this.tick.minorColorDark
-             : this.tick.minorColor,
+           stroke: this.options.config.darkmode
+             ? this.options.tick.minorColorDark
+             : this.options.tick.minorColor,
          });
        }
        for (const child of this.shapes.yAxisMajorTicks.children()) {
          child.attr({
-           stroke: this.config.darkmode ? this.tick.colorDark : this.tick.color,
+           stroke: this.options.config.darkmode ? this.options.tick.colorDark : this.options.tick.color,
          });
        }
        for (const child of this.shapes.xAxisMajorTicks.children()) {
          child.attr({
-           stroke: this.config.darkmode
-             ? this.labels.colorDark
-             : this.labels.color,
+           stroke: this.options.config.darkmode
+             ? this.options.labels.colorDark
+             : this.options.labels.color,
          });
        }
        for (const child of this.shapes.yAxisLabels.children()) {
          child.attr({
-           fill: this.config.darkmode ? this.labels.colorDark : this.labels.color,
+           fill: this.options.config.darkmode ? this.options.labels.colorDark : this.options.labels.color,
          });
        }
        for (const child of this.shapes.xAxisLabels.children()) {
          child.attr({
-           fill: this.config.darkmode ? this.labels.colorDark : this.labels.color,
+           fill: this.options.config.darkmode ? this.options.labels.colorDark : this.options.labels.color,
          });
        }
      }
    }
 
+   function mergeOptions(defaults, user) {
+     let merged = {};
+     for (const key in defaults){
+       merged[key] = {...defaults[key], ...user[key]};
+     }
+     return merged;
+   }
    function setMutationObserver() {
      //Set up body class observer to watch for dark mode activation
      function callback(mutationsList) {
        mutationsList.forEach((mutation) => {
          if (mutation.attributeName === "class") {
            if (
-             (!chart.config.darkmode &&
+             (!chart.options.config.darkmode &&
                document.querySelector("body").classList.contains("dark-mode")) ||
-             (chart.config.darkmode &&
+             (chart.options.config.darkmode &&
                !document.querySelector("body").classList.contains("dark-mode"))
            ) {
              chart.toggleDarkMode();
@@ -223,12 +235,12 @@ var sirChart = (function (exports) {
    function buildCSS(chart) {
      let cssText = `
   rect.bar:hover{
-    fill: ${LightenDarkenColor(chart.bar.color, 90)};
-    stroke: ${LightenDarkenColor(chart.bar.strokeColor, 55)};
+    fill: ${LightenDarkenColor(chart.options.bar.color, 90)};
+    stroke: ${LightenDarkenColor(chart.options.bar.strokeColor, 55)};
   }
   body.dark-mode rect.bar:hover{
-    fill: ${LightenDarkenColor(chart.bar.colorDark, 90)};
-    stroke: ${LightenDarkenColor(chart.bar.strokeColorDark, 55)};
+    fill: ${LightenDarkenColor(chart.options.bar.colorDark, 90)};
+    stroke: ${LightenDarkenColor(chart.options.bar.strokeColorDark, 55)};
   }
   `;
      console.log(cssText);
@@ -275,14 +287,14 @@ var sirChart = (function (exports) {
    draw.drawYAxisLine = function (svg, chart) {
      return svg
        .line(
-         chart.margin.left,
-         chart.margin.top,
-         chart.margin.left,
-         chart.size.height - chart.margin.bottom
+         chart.options.margin.left,
+         chart.options.margin.top,
+         chart.options.margin.left,
+         chart.options.size.height - chart.options.margin.bottom
        )
        .stroke({
-         color: chart.config.darkmode ? chart.axis.colorDark : chart.axis.color,
-         width: chart.axis.thickness,
+         color: chart.options.config.darkmode ? chart.options.axis.colorDark : chart.options.axis.color,
+         width: chart.options.axis.thickness,
          linecap: "round",
        });
    };
@@ -291,14 +303,14 @@ var sirChart = (function (exports) {
    draw.drawXAxisLine = function (svg, chart) {
      return svg
        .line(
-         chart.margin.left,
-         chart.size.height - chart.margin.bottom,
-         chart.size.width - chart.margin.right,
-         chart.size.height - chart.margin.bottom
+         chart.options.margin.left,
+         chart.options.size.height - chart.options.margin.bottom,
+         chart.options.size.width - chart.options.margin.right,
+         chart.options.size.height - chart.options.margin.bottom
        )
        .stroke({
-         color: chart.config.darkmode ? chart.axis.colorDark : chart.axis.color,
-         width: chart.axis.thickness,
+         color: chart.options.config.darkmode ? chart.options.axis.colorDark : chart.options.axis.color,
+         width: chart.options.axis.thickness,
          linecap: "round",
        });
    };
@@ -306,10 +318,10 @@ var sirChart = (function (exports) {
    // Draw the y-axis minor ticks
    draw.drawYAxisMinorTicks = function (svg, chart) {
      let yAxisMinorTicks = svg.group();
-     let xStart = chart.margin.left;
-     let xEnd = chart.margin.left - chart.tick.minorLength;
-     let yStart = chart.margin.top;
-     let yEnd = chart.size.height - chart.margin.bottom;
+     let xStart = chart.options.margin.left;
+     let xEnd = chart.options.margin.left - chart.options.tick.minorLength;
+     let yStart = chart.options.margin.top;
+     let yEnd = chart.options.size.height - chart.options.margin.bottom;
      let yRange = Math.abs(yEnd - yStart);
      let yTickSpacing =
        yRange / chart.scale.tickCount / chart.scale.minorTickCount;
@@ -320,10 +332,10 @@ var sirChart = (function (exports) {
      ) {
        let yCurrent = yStart + i * yTickSpacing;
        yAxisMinorTicks.line(xStart, yCurrent, xEnd, yCurrent).stroke({
-         color: chart.config.darkmode
-           ? chart.tick.minorColorDark
-           : chart.tick.minorColor,
-         width: chart.tick.thickness,
+         color: chart.options.config.darkmode
+           ? chart.options.tick.minorColorDark
+           : chart.options.tick.minorColor,
+         width: chart.options.tick.thickness,
          linecap: "round",
        });
      }
@@ -333,17 +345,17 @@ var sirChart = (function (exports) {
    // Draw the y-axis major ticks
    draw.drawYAxisMajorTicks = function (svg, chart) {
      let yAxisMajorTicks = svg.group();
-     let xStart = chart.margin.left;
-     let xEnd = chart.margin.left - chart.tick.length;
-     let yStart = chart.margin.top;
-     let yEnd = chart.size.height - chart.margin.bottom;
+     let xStart = chart.options.margin.left;
+     let xEnd = chart.options.margin.left - chart.options.tick.length;
+     let yStart = chart.options.margin.top;
+     let yEnd = chart.options.size.height - chart.options.margin.bottom;
      let yRange = Math.abs(yEnd - yStart);
      let yTickSpacing = yRange / chart.scale.tickCount;
      for (let i = 0; i <= chart.scale.tickCount; i++) {
        let yCurrent = yStart + i * yTickSpacing;
        yAxisMajorTicks.line(xStart, yCurrent, xEnd, yCurrent).stroke({
-         color: chart.config.darkmode ? chart.tick.colorDark : chart.tick.color,
-         width: chart.tick.thickness,
+         color: chart.options.config.darkmode ? chart.options.tick.colorDark : chart.options.tick.color,
+         width: chart.options.tick.thickness,
          linecap: "round",
        });
      }
@@ -353,17 +365,17 @@ var sirChart = (function (exports) {
    // Draw the x-axis ticks
    draw.drawXAxisMajorTicks = function (svg, chart) {
      let xAxisMajorTicks = svg.group();
-     let yStart = chart.size.height - chart.margin.bottom;
-     let yEnd = yStart + chart.tick.length;
-     let xStart = chart.margin.left;
-     let xEnd = chart.size.width - chart.margin.right;
+     let yStart = chart.options.size.height - chart.options.margin.bottom;
+     let yEnd = yStart + chart.options.tick.length;
+     let xStart = chart.options.margin.left;
+     let xEnd = chart.options.size.width - chart.options.margin.right;
      let xRange = Math.abs(xEnd - xStart);
      let xTickSpacing = xRange / chart.data.length;
      for (let i = 0; i <= chart.data.length; i++) {
        let xCurrent = xStart + i * xTickSpacing;
        xAxisMajorTicks.line(xCurrent, yStart, xCurrent, yEnd).stroke({
-         color: chart.config.darkmode ? chart.tick.colorDark : chart.tick.color,
-         width: chart.tick.thickness,
+         color: chart.options.config.darkmode ? chart.options.tick.colorDark : chart.options.tick.color,
+         width: chart.options.tick.thickness,
          linecap: "round",
        });
      }
@@ -377,16 +389,16 @@ var sirChart = (function (exports) {
        y: svg.group(),
      };
      let xAxisStart = {
-       x1: chart.margin.left,
-       y1: chart.size.height - chart.margin.bottom,
-       x2: chart.size.width - chart.margin.right,
-       y2: chart.size.height - chart.margin.bottom,
+       x1: chart.options.margin.left,
+       y1: chart.options.size.height - chart.options.margin.bottom,
+       x2: chart.options.size.width - chart.options.margin.right,
+       y2: chart.options.size.height - chart.options.margin.bottom,
      };
      let yAxisStart = {
-       x1: chart.margin.left,
-       y1: chart.size.height - chart.margin.bottom,
-       x2: chart.margin.left,
-       y2: chart.margin.top,
+       x1: chart.options.margin.left,
+       y1: chart.options.size.height - chart.options.margin.bottom,
+       x2: chart.options.margin.left,
+       y2: chart.options.margin.top,
      };
      let yStep = Math.abs(yAxisStart.y2 - yAxisStart.y1) / chart.scale.tickCount;
      let xStep = Math.abs(xAxisStart.x2 - xAxisStart.x1) / chart.data.length;
@@ -398,12 +410,12 @@ var sirChart = (function (exports) {
        gridLines.x
          .line(xAxisStart.x1, xAxisCurrent.y1, xAxisStart.x2, xAxisCurrent.y2)
          .stroke({
-           color: chart.config.darkmode
-             ? chart.grid.majorColorDark
-             : chart.grid.majorColor,
-           width: chart.grid.majorThickness,
+           color: chart.options.config.darkmode
+             ? chart.options.grid.majorColorDark
+             : chart.options.grid.majorColor,
+           width: chart.options.grid.majorThickness,
            linecap: "round",
-           dasharray: chart.grid.majorDasharray,
+           dasharray: chart.options.grid.majorDasharray,
          })
          .addClass("gridline-major-x");
      }
@@ -416,12 +428,12 @@ var sirChart = (function (exports) {
        gridLines.y
          .line(yAxisCurrent.x1, yAxisStart.y1, yAxisCurrent.x2, yAxisStart.y2)
          .stroke({
-           color: chart.config.darkmode
-             ? chart.grid.majorColorDark
-             : chart.grid.majorColor,
-           width: chart.grid.majorThickness,
+           color: chart.options.config.darkmode
+             ? chart.options.grid.majorColorDark
+             : chart.options.grid.majorColor,
+           width: chart.options.grid.majorThickness,
            linecap: "round",
-           dasharray: chart.grid.majorDasharray,
+           dasharray: chart.options.grid.majorDasharray,
          })
          .addClass("gridline-major-y");
      }
@@ -431,14 +443,14 @@ var sirChart = (function (exports) {
    // Draw bars
    draw.drawBars = function (svg, chart) {
      let bars = svg.group();
-     let xAxisStart = chart.margin.left;
-     let xAxisEnd = chart.size.width - chart.margin.right;
+     let xAxisStart = chart.options.margin.left;
+     let xAxisEnd = chart.options.size.width - chart.options.margin.right;
      let xAxisRange = Math.abs(xAxisEnd - xAxisStart);
      let barSpace = xAxisRange / chart.data.length;
      let xStart = xAxisStart + barSpace / 2;
-     let width = barSpace - barSpace * (chart.bar.spacing / 100);
-     let yStart = chart.size.height - chart.margin.bottom;
-     let yEnd = chart.margin.top;
+     let width = barSpace - barSpace * (chart.options.bar.spacing / 100);
+     let yStart = chart.options.size.height - chart.options.margin.bottom;
+     let yEnd = chart.options.margin.top;
      let yRange = Math.abs(yEnd - yStart);
      let yConstant = yRange / Math.abs(chart.scale.niceMax - chart.scale.niceMin);
      for (let i = 0; i < chart.data.length; i++) {
@@ -453,12 +465,12 @@ var sirChart = (function (exports) {
            },
          })
          .attr({
-           fill: chart.config.darkmode ? chart.bar.colorDark : chart.bar.color,
-           "fill-opacity": chart.bar.fillOpacity,
-           stroke: chart.config.darkmode
-             ? chart.bar.strokeColorDark
-             : chart.bar.strokeColor,
-           "stroke-width": chart.bar.strokeWidth,
+           fill: chart.options.config.darkmode ? chart.options.bar.colorDark : chart.options.bar.color,
+           "fill-opacity": chart.options.bar.fillOpacity,
+           stroke: chart.options.config.darkmode
+             ? chart.options.bar.strokeColorDark
+             : chart.options.bar.strokeColor,
+           "stroke-width": chart.options.bar.strokeWidth,
          })
          .addClass("bar")
          .addClass("dataset-01");
@@ -469,9 +481,9 @@ var sirChart = (function (exports) {
    // Draw y-axis labels
    draw.drawYAxisLabels = function (svg, chart) {
      let yAxisLabels = svg.group();
-     let xOrigin = chart.margin.left - chart.labels.yOffset;
-     let yOrigin = chart.size.height - chart.margin.bottom;
-     let yRange = Math.abs(chart.margin.top - yOrigin);
+     let xOrigin = chart.options.margin.left - chart.options.labels.yOffset;
+     let yOrigin = chart.options.size.height - chart.options.margin.bottom;
+     let yRange = Math.abs(chart.options.margin.top - yOrigin);
      let yStep = yRange / chart.scale.tickCount;
      for (let i = 0; i <= chart.scale.tickCount; i++) {
        let yCurrent = yOrigin - i * yStep;
@@ -482,9 +494,9 @@ var sirChart = (function (exports) {
        yAxisLabels
          .text(labelText)
          .font({
-           fill: chart.config.darkmode
-             ? chart.labels.colorDark
-             : chart.labels.color,
+           fill: chart.options.config.darkmode
+             ? chart.options.labels.colorDark
+             : chart.options.labels.color,
            family: "Roboto",
          })
          .transform({
@@ -501,9 +513,9 @@ var sirChart = (function (exports) {
    // Draw x-axis labels
    draw.drawXAxisLabels = function (svg, chart) {
      let xAxisLabels = svg.group();
-     let xOrigin = chart.margin.left;
-     let yOrigin = chart.size.height - chart.margin.bottom + chart.labels.xOffset;
-     let xRange = Math.abs(chart.size.width - chart.margin.right - xOrigin);
+     let xOrigin = chart.options.margin.left;
+     let yOrigin = chart.options.size.height - chart.options.margin.bottom + chart.options.labels.xOffset;
+     let xRange = Math.abs(chart.options.size.width - chart.options.margin.right - xOrigin);
      let xStep = xRange / chart.data.length;
      let xStart = xOrigin + xStep / 2;
      for (let i = 0; i < chart.data.length; i++) {
@@ -511,9 +523,9 @@ var sirChart = (function (exports) {
        xAxisLabels
          .text(String(i))
          .font({
-           fill: chart.config.darkmode
-             ? chart.labels.colorDark
-             : chart.labels.color,
+           fill: chart.options.config.darkmode
+             ? chart.options.labels.colorDark
+             : chart.options.labels.color,
            family: "Roboto",
          })
          .transform({

@@ -8,7 +8,8 @@ function ready(fn) {
 }
 
 // Define options object
-const options = {};
+const options = {
+};
 // Get chart element
 // const element = document.getElementById("#graph");
 const element = "#graph";
