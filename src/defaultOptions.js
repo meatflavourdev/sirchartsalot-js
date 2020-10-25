@@ -1,6 +1,11 @@
 const defaultOptions = {
   config: {
-    darkmode: false
+    darkmode: false,
+    darkmodeWatch: {
+      enable: false,
+      element: 'body',
+      class: 'dark-mode'
+    }
   },
   size: {
     width: 2000,

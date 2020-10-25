@@ -10,7 +10,8 @@ function ready(fn) {
 // Define options object
 const options = {
   config: {
-    darkWatch: {
+    darkmodeWatch: {
+      enable: true,
       element: 'body',
       class: 'dark-mode'
     }
