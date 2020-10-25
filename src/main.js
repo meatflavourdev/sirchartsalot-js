@@ -49,7 +49,7 @@ export const drawBarChart = function (data, options, element) {
   // Add dark mode class on config
   if (
     chart.options.config.darkmode ||
-    (chart.options.config.darkmodeWatch.enable && detectDarkMode())
+    (chart.options.config.darkmodeWatch.enable && detectDarkMode(chart))
   ) {
     chart.svg.addClass("darkchart");
   }
@@ -123,7 +123,6 @@ function setMutationObserver(chart) {
         if (prevState !== currentState) {
           prevState = currentState;
           chart.toggleDarkMode();
-          console.log(`${watchClass} class ${currentState ? 'added' : 'removed'}`);
         }
       }
     });
@@ -219,9 +218,9 @@ function removeCSS(element) {
 }
 
 // Detect dark mode
-function detectDarkMode() {
-  let element = document.querySelector("body");
-  let darkmode = element.classList.contains("darkchart");
+function detectDarkMode(chart) {
+  let element = document.querySelector(chart.options.config.darkmodeWatch.element);
+  let darkmode = element.classList.contains(chart.options.config.darkmodeWatch.class);
   return darkmode;
 }
 
