@@ -3,7 +3,12 @@ var sirChart = (function (exports) {
 
    const defaultOptions = {
      config: {
-       darkmode: false
+       darkmode: false,
+       darkmodeWatch: {
+         enable: false,
+         element: 'body',
+         class: 'dark-mode'
+       }
      },
      size: {
        width: 2000,
@@ -91,10 +96,6 @@ var sirChart = (function (exports) {
      // Set chart ID
      chart.id = 'sirchart-' + ID();
 
-     //Detect dark mode and set config
-     //chart.options.config.darkmode = (chart.options.config.darkmode) ? chart.options.config.darkmode : detectDarkMode();
-     //setMutationObserver(chart);
-
      // Build and inject CSS rules
      let cssText = buildCSS(chart);
      let cssElement = addCSS(chart.id, cssText);
@@ -107,9 +108,17 @@ var sirChart = (function (exports) {
        .size("100%", "100%")
        .viewbox(0, 0, chart.options.size.width, chart.options.size.height);
 
-     // Add dark mode class
-     if(chart.options.config.darkmode){
-       chart.svg.addClass('darkchart');
+     // Add dark mode class on config
+     if (
+       chart.options.config.darkmode ||
+       (chart.options.config.darkmodeWatch.enable && detectDarkMode())
+     ) {
+       chart.svg.addClass("darkchart");
+     }
+
+     // If configured, set mutation observer to watch for changes and toggle class
+     if (chart.options.config.darkmodeWatch.enable) {
+       setMutationObserver(chart);
      }
 
      // Calculate chart axis min, max, major/minor interval
@@ -150,8 +159,7 @@ var sirChart = (function (exports) {
      }
 
      toggleDarkMode() {
-       this.options.config.darkmode = !this.options.config.darkmode;
-       this.svg.toggleClass('darkchart');
+       this.svg.toggleClass("darkchart");
      }
    }
 
@@ -162,6 +170,30 @@ var sirChart = (function (exports) {
      }
      return merged;
    }
+   function setMutationObserver(chart) {
+     //Get element to watch
+     let watchElm = document.querySelector(chart.options.config.darkmodeWatch.element);
+     let watchClass = chart.options.config.darkmodeWatch.class;
+     //Set up body class observer to watch for dark mode activation
+     let prevState = watchElm.classList.contains(watchClass);
+     function callback(mutationsList) {
+       mutationsList.forEach((mutation) => {
+         if (mutation.attributeName === "class") {
+           const currentState = mutation.target.classList.contains(watchClass);
+           if (prevState !== currentState) {
+             prevState = currentState;
+             chart.toggleDarkMode();
+             console.log(`${watchClass} class ${currentState ? 'added' : 'removed'}`);
+           }
+         }
+       });
+     }
+     const mutationObserver = new MutationObserver(callback);
+     mutationObserver.observe(watchElm, {
+       attributes: true,
+     });
+   }
+
    function buildCSS(chart) {
      let cssText = `
   #${chart.id} rect.bar{
@@ -239,6 +271,13 @@ var sirChart = (function (exports) {
      style.textContent = text;
      document.head.appendChild(style);
      return style;
+   }
+
+   // Detect dark mode
+   function detectDarkMode() {
+     let element = document.querySelector("body");
+     let darkmode = element.classList.contains("darkchart");
+     return darkmode;
    }
 
    const draw = {};
