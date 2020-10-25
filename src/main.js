@@ -31,21 +31,33 @@ export const drawBarChart = function (data, options, element) {
   console.log(chart);
   // Get data from params and store it in config object
   chart.data = data;
-  //Detect dark mode and set config
-  chart.options.config.darkmode = (chart.options.config.darkmode) ? chart.options.config.darkmode : detectDarkMode();
-
-  setMutationObserver();
+  // Set chart ID
+  chart.id = 'sirchart-' + ID();
 
   // Build and inject CSS rules
   let cssText = buildCSS(chart);
-  let cssElement = addCSS(cssText);
+  let cssElement = addCSS(chart.id, cssText);
   // Store element for later modification
   chart.css.element = cssElement;
 
-  var chartSVG = SVG()
+  chart.svg = SVG()
+    .attr('id', chart.id)
     .addTo(element)
     .size("100%", "100%")
     .viewbox(0, 0, chart.options.size.width, chart.options.size.height);
+
+  // Add dark mode class on config
+  if (
+    chart.options.config.darkmode ||
+    (chart.options.config.darkmodeWatch.enable && detectDarkMode())
+  ) {
+    chart.svg.addClass("darkchart");
+  }
+
+  // If configured, set mutation observer to watch for changes and toggle class
+  if (chart.options.config.darkmodeWatch.enable) {
+    setMutationObserver(chart);
+  }
 
   // Calculate chart axis min, max, major/minor interval
   let dataMax = 0;
@@ -60,17 +72,16 @@ export const drawBarChart = function (data, options, element) {
     dataMin,
     dataMax
   );
-  console.log(chart.scale);
 
-  chart.shapes.gridLines = draw.drawGridLines(chartSVG, chart);
-  chart.shapes.bars = draw.drawBars(chartSVG, chart);
-  chart.shapes.yAxisLine = draw.drawYAxisLine(chartSVG, chart);
-  chart.shapes.xAxisLine = draw.drawXAxisLine(chartSVG, chart);
-  chart.shapes.yAxisMinorTicks = draw.drawYAxisMinorTicks(chartSVG, chart);
-  chart.shapes.yAxisMajorTicks = draw.drawYAxisMajorTicks(chartSVG, chart);
-  chart.shapes.xAxisMajorTicks = draw.drawXAxisMajorTicks(chartSVG, chart);
-  chart.shapes.yAxisLabels = draw.drawYAxisLabels(chartSVG, chart);
-  chart.shapes.xAxisLabels = draw.drawXAxisLabels(chartSVG, chart);
+  chart.shapes.gridLines = draw.drawGridLines(chart.svg, chart);
+  chart.shapes.bars = draw.drawBars(chart.svg, chart);
+  chart.shapes.yAxisLine = draw.drawYAxisLine(chart.svg, chart);
+  chart.shapes.xAxisLine = draw.drawXAxisLine(chart.svg, chart);
+  chart.shapes.yAxisMinorTicks = draw.drawYAxisMinorTicks(chart.svg, chart);
+  chart.shapes.yAxisMajorTicks = draw.drawYAxisMajorTicks(chart.svg, chart);
+  chart.shapes.xAxisMajorTicks = draw.drawXAxisMajorTicks(chart.svg, chart);
+  chart.shapes.yAxisLabels = draw.drawYAxisLabels(chart.svg, chart);
+  chart.shapes.xAxisLabels = draw.drawXAxisLabels(chart.svg, chart);
 
   return chart;
 };
@@ -86,65 +97,7 @@ class Chart {
   }
 
   toggleDarkMode() {
-    this.options.config.darkmode = !this.options.config.darkmode;
-    // Set colours on elements to light
-    for (const child of this.shapes.gridLines.x.children()) {
-      child.attr({
-        stroke: this.options.config.darkmode
-          ? this.options.grid.majorColorDark
-          : this.options.grid.majorColor,
-      });
-    }
-    for (const child of this.shapes.gridLines.y.children()) {
-      child.attr({
-        stroke: this.options.config.darkmode
-          ? this.options.grid.majorColorDark
-          : this.options.grid.majorColor,
-      });
-    }
-    this.shapes.yAxisLine.attr({
-      stroke: this.options.config.darkmode ? this.options.axis.colorDark : this.options.axis.color,
-    });
-    this.shapes.xAxisLine.attr({
-      stroke: this.options.config.darkmode ? this.options.axis.colorDark : this.options.axis.color,
-    });
-    for (const child of this.shapes.bars.children()) {
-      child.attr({
-        fill: this.options.config.darkmode ? this.options.bar.colorDark : this.options.bar.color,
-        stroke: this.options.config.darkmode
-          ? this.options.bar.strokeColorDark
-          : this.options.bar.strokeColor,
-      });
-    }
-    for (const child of this.shapes.yAxisMinorTicks.children()) {
-      child.attr({
-        stroke: this.options.config.darkmode
-          ? this.options.tick.minorColorDark
-          : this.options.tick.minorColor,
-      });
-    }
-    for (const child of this.shapes.yAxisMajorTicks.children()) {
-      child.attr({
-        stroke: this.options.config.darkmode ? this.options.tick.colorDark : this.options.tick.color,
-      });
-    }
-    for (const child of this.shapes.xAxisMajorTicks.children()) {
-      child.attr({
-        stroke: this.options.config.darkmode
-          ? this.options.labels.colorDark
-          : this.options.labels.color,
-      });
-    }
-    for (const child of this.shapes.yAxisLabels.children()) {
-      child.attr({
-        fill: this.options.config.darkmode ? this.options.labels.colorDark : this.options.labels.color,
-      });
-    }
-    for (const child of this.shapes.xAxisLabels.children()) {
-      child.attr({
-        fill: this.options.config.darkmode ? this.options.labels.colorDark : this.options.labels.color,
-      });
-    }
+    this.svg.toggleClass("darkchart");
   }
 }
 
@@ -156,40 +109,80 @@ function mergeOptions(defaults, user) {
   return merged;
 };
 
-function setMutationObserver() {
+function setMutationObserver(chart) {
+  //Get element to watch
+  let watchElm = document.querySelector(chart.options.config.darkmodeWatch.element);
+  let watchClass = chart.options.config.darkmodeWatch.class;
   //Set up body class observer to watch for dark mode activation
+  let prevState = watchElm.classList.contains(watchClass);
   function callback(mutationsList) {
     mutationsList.forEach((mutation) => {
+      const { target } = mutation;
       if (mutation.attributeName === "class") {
-        if (
-          (!chart.options.config.darkmode &&
-            document.querySelector("body").classList.contains("dark-mode")) ||
-          (chart.options.config.darkmode &&
-            !document.querySelector("body").classList.contains("dark-mode"))
-        ) {
+        const currentState = mutation.target.classList.contains(watchClass);
+        if (prevState !== currentState) {
+          prevState = currentState;
           chart.toggleDarkMode();
+          console.log(`${watchClass} class ${currentState ? 'added' : 'removed'}`);
         }
       }
     });
   }
   const mutationObserver = new MutationObserver(callback);
-  mutationObserver.observe(document.querySelector("body"), {
+  mutationObserver.observe(watchElm, {
     attributes: true,
   });
 }
 
 function buildCSS(chart) {
   let cssText = `
-  rect.bar:hover{
+  #${chart.id} rect.bar{
+    fill: ${chart.options.bar.color};
+    stroke: ${chart.options.bar.strokeColor};
+  }
+  #${chart.id}.darkchart rect.bar{
+    fill: ${chart.options.bar.colorDark};
+    stroke: ${chart.options.bar.strokeColorDark};
+  }
+  #${chart.id} rect.bar:hover{
     fill: ${LightenDarkenColor(chart.options.bar.color, 90)};
     stroke: ${LightenDarkenColor(chart.options.bar.strokeColor, 55)};
   }
-  body.dark-mode rect.bar:hover{
+  #${chart.id}.darkchart rect.bar:hover{
     fill: ${LightenDarkenColor(chart.options.bar.colorDark, 90)};
     stroke: ${LightenDarkenColor(chart.options.bar.strokeColorDark, 55)};
   }
+  #${chart.id} .gridline.major {
+    stroke: ${chart.options.grid.majorColor}
+  }
+  #${chart.id}.darkchart .gridline.major {
+    stroke: ${chart.options.grid.majorColorDark}
+  }
+  #${chart.id} .axis {
+    stroke: ${chart.options.axis.color}
+  }
+  #${chart.id}.darkchart .axis {
+    stroke: ${chart.options.axis.colorDark}
+  }
+  #${chart.id} .tick.minor {
+    stroke: ${chart.options.tick.minorColor}
+  }
+  #${chart.id}.darkchart .tick.minor {
+    stroke: ${chart.options.axis.minorColorDark}
+  }
+  #${chart.id} .tick.major {
+    stroke: ${chart.options.tick.color}
+  }
+  #${chart.id}.darkchart .tick.major {
+    stroke: ${chart.options.axis.colorDark}
+  }
+  #${chart.id} .label {
+    fill: ${chart.options.labels.color}
+  }
+  #${chart.id}.darkchart .label {
+    fill: ${chart.options.labels.colorDark}
+  }
   `;
-  console.log(cssText);
   return cssText;
 }
 
@@ -212,12 +205,11 @@ function LightenDarkenColor(col, amt) {
   return (usePound ? "#" : "") + (g | (b << 8) | (r << 16)).toString(16);
 }
 
-function addCSS(text) {
+function addCSS(id, text) {
   var style = document.createElement("style");
-  style.id = `sirchart-${ID()}-style`;
+  style.id = `${id}-style`;
   style.textContent = text;
   document.head.appendChild(style);
-  console.log(`${style.id} - ${style.textContent}`);
   return style;
 }
 
@@ -229,7 +221,7 @@ function removeCSS(element) {
 // Detect dark mode
 function detectDarkMode() {
   let element = document.querySelector("body");
-  let darkmode = element.classList.contains("dark-mode");
+  let darkmode = element.classList.contains("darkchart");
   return darkmode;
 }
 
@@ -244,10 +236,11 @@ draw.drawYAxisLine = function (svg, chart) {
       chart.options.size.height - chart.options.margin.bottom
     )
     .stroke({
-      color: chart.options.config.darkmode ? chart.options.axis.colorDark : chart.options.axis.color,
       width: chart.options.axis.thickness,
       linecap: "round",
-    });
+    })
+    .addClass('axis')
+    .addClass('y');
 };
 
 // Draw the chart x-axis line
@@ -260,10 +253,11 @@ draw.drawXAxisLine = function (svg, chart) {
       chart.options.size.height - chart.options.margin.bottom
     )
     .stroke({
-      color: chart.options.config.darkmode ? chart.options.axis.colorDark : chart.options.axis.color,
       width: chart.options.axis.thickness,
       linecap: "round",
-    });
+    })
+    .addClass('axis')
+    .addClass('x');
 };
 
 // Draw the y-axis minor ticks
@@ -283,12 +277,12 @@ draw.drawYAxisMinorTicks = function (svg, chart) {
   ) {
     let yCurrent = yStart + i * yTickSpacing;
     yAxisMinorTicks.line(xStart, yCurrent, xEnd, yCurrent).stroke({
-      color: chart.options.config.darkmode
-        ? chart.options.tick.minorColorDark
-        : chart.options.tick.minorColor,
       width: chart.options.tick.thickness,
       linecap: "round",
-    });
+    })
+    .addClass('tick')
+    .addClass('minor')
+    .addClass('y');
   }
   return yAxisMinorTicks;
 };
@@ -305,10 +299,12 @@ draw.drawYAxisMajorTicks = function (svg, chart) {
   for (let i = 0; i <= chart.scale.tickCount; i++) {
     let yCurrent = yStart + i * yTickSpacing;
     yAxisMajorTicks.line(xStart, yCurrent, xEnd, yCurrent).stroke({
-      color: chart.options.config.darkmode ? chart.options.tick.colorDark : chart.options.tick.color,
       width: chart.options.tick.thickness,
       linecap: "round",
-    });
+    })
+    .addClass('tick')
+    .addClass('major')
+    .addClass('y');
   }
   return yAxisMajorTicks;
 };
@@ -325,10 +321,12 @@ draw.drawXAxisMajorTicks = function (svg, chart) {
   for (let i = 0; i <= chart.data.length; i++) {
     let xCurrent = xStart + i * xTickSpacing;
     xAxisMajorTicks.line(xCurrent, yStart, xCurrent, yEnd).stroke({
-      color: chart.options.config.darkmode ? chart.options.tick.colorDark : chart.options.tick.color,
       width: chart.options.tick.thickness,
       linecap: "round",
-    });
+    })
+    .addClass('tick')
+    .addClass('major')
+    .addClass('x');
   }
   return xAxisMajorTicks;
 };
@@ -361,14 +359,13 @@ draw.drawGridLines = function (svg, chart) {
     gridLines.x
       .line(xAxisStart.x1, xAxisCurrent.y1, xAxisStart.x2, xAxisCurrent.y2)
       .stroke({
-        color: chart.options.config.darkmode
-          ? chart.options.grid.majorColorDark
-          : chart.options.grid.majorColor,
         width: chart.options.grid.majorThickness,
         linecap: "round",
         dasharray: chart.options.grid.majorDasharray,
       })
-      .addClass("gridline-major-x");
+      .addClass("gridline")
+      .addClass("major")
+      .addClass("x");
   }
 
   for (let i = 0; i <= chart.data.length; i++) {
@@ -379,14 +376,13 @@ draw.drawGridLines = function (svg, chart) {
     gridLines.y
       .line(yAxisCurrent.x1, yAxisStart.y1, yAxisCurrent.x2, yAxisStart.y2)
       .stroke({
-        color: chart.options.config.darkmode
-          ? chart.options.grid.majorColorDark
-          : chart.options.grid.majorColor,
         width: chart.options.grid.majorThickness,
         linecap: "round",
         dasharray: chart.options.grid.majorDasharray,
       })
-      .addClass("gridline-major-y");
+      .addClass("gridline")
+      .addClass("major")
+      .addClass("y");
   }
   return gridLines;
 };
@@ -416,11 +412,7 @@ draw.drawBars = function (svg, chart) {
         },
       })
       .attr({
-        fill: chart.options.config.darkmode ? chart.options.bar.colorDark : chart.options.bar.color,
         "fill-opacity": chart.options.bar.fillOpacity,
-        stroke: chart.options.config.darkmode
-          ? chart.options.bar.strokeColorDark
-          : chart.options.bar.strokeColor,
         "stroke-width": chart.options.bar.strokeWidth,
       })
       .addClass("bar")
@@ -445,9 +437,6 @@ draw.drawYAxisLabels = function (svg, chart) {
     yAxisLabels
       .text(labelText)
       .font({
-        fill: chart.options.config.darkmode
-          ? chart.options.labels.colorDark
-          : chart.options.labels.color,
         family: "Roboto",
       })
       .transform({
@@ -456,7 +445,9 @@ draw.drawYAxisLabels = function (svg, chart) {
           x: xOrigin,
           y: yCurrent,
         },
-      });
+      })
+      .addClass('label')
+      .addClass('y');
   }
   return yAxisLabels;
 };
@@ -474,9 +465,6 @@ draw.drawXAxisLabels = function (svg, chart) {
     xAxisLabels
       .text(String(i))
       .font({
-        fill: chart.options.config.darkmode
-          ? chart.options.labels.colorDark
-          : chart.options.labels.color,
         family: "Roboto",
       })
       .transform({
@@ -485,7 +473,9 @@ draw.drawXAxisLabels = function (svg, chart) {
           x: xCurrent,
           y: yOrigin,
         },
-      });
+      })
+      .addClass('label')
+      .addClass('x');
   }
   return xAxisLabels;
 };
@@ -571,7 +561,7 @@ function niceNum(range, round) {
 //     var privateName = ID();
 //     var o = { 'public': 'foo' };
 //     o[privateName] = 'bar';
-var ID = function () {
+function ID () {
   // Math.random should be unique because of its seeding algorithm.
   // Convert it to base 36 (numbers + letters), and grab the first 9 characters
   // after the decimal.

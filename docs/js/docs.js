@@ -9,6 +9,13 @@ function ready(fn) {
 
 // Define options object
 const options = {
+  config: {
+    darkmodeWatch: {
+      enable: true,
+      element: 'body',
+      class: 'dark-mode'
+    }
+  }
 };
 // Get chart element
 // const element = document.getElementById("#graph");
