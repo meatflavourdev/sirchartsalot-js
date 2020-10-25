@@ -1,5 +1,7 @@
 const defaultOptions = {
-  config: {},
+  config: {
+    darkmode: false
+  },
   size: {
     width: 2000,
     height: 1000
